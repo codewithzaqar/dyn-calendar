@@ -16,8 +16,8 @@ body {
   border: 1px solid #ddd;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
   padding-bottom: 15px;
+  overflow: hidden;
 }
 
 header {
@@ -44,6 +44,15 @@ header button:hover {
 
 #month-year {
   font-size: 1.4rem;
+}
+
+#search-bar {
+  width: calc(100% - 40px);
+  margin: 10px 20px;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 #calendar {
@@ -74,21 +83,17 @@ header button:hover {
   background-color: #e0f2f1;
 }
 
-#calendar td.event-day::after {
-  content: "•";
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.2rem;
-  color: #1976d2;
+#calendar td.event-day {
+  background-color: #ffecb3;
 }
 
-#calendar td.today {
-  background-color: #1976d2;
-  color: white;
-  font-weight: bold;
-  border: 2px solid #0d47a1;
+#calendar td.event-day::after {
+  content: "+";
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 0.9rem;
+  color: #1976d2;
 }
 
 #event-popup {
@@ -101,49 +106,44 @@ header button:hover {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   display: none;
-  flex-direction: column;
   z-index: 10;
-  max-width: 300px;
+  width: 90%;
+  max-width: 400px;
 }
 
 #event-popup input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  font-size: 1rem;
+  width: calc(100% - 20px);
+  margin: 10px auto;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
 
+#event-popup ul {
+  list-style: none;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+#event-popup ul li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
 #popup-buttons button {
-  background-color: #1976d2;
-  color: white;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
   margin: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-#popup-buttons button:hover {
-  background-color: #0d47a1;
-}
-
-#popup-buttons #delete-event {
-  background-color: #d32f2f;
-}
-
-#popup-buttons #delete-event:hover {
-  background-color: #b71c1c;
 }
 
 #clear-events {
-  display: block;
-  margin: 10px auto;
-  padding: 10px 20px;
-  background-color: #d32f2f;
+  margin: 10px 20px;
+  padding: 8px;
+  font-size: 1rem;
   color: white;
+  background-color: #d32f2f;
   border: none;
   border-radius: 4px;
   cursor: pointer;

@@ -4,14 +4,15 @@ const monthYear = document.getElementById('month-year');
 const prevMonthButton = document.getElementById('prev-month');
 const nextMonthButton = document.getElementById('next-month');
 const eventPopup = document.getElementById('event-popup');
+const eventDate = document.getElementById('event-date');
+const eventList = document.getElementById('event-list');
 const eventTitleInput = document.getElementById('event-title');
-const saveEventButton = document.getElementById('save-event');
-const deleteEventButton = document.getElementById('delete-event');
+const addEventButton = document.getElementById('add-event');
 const closePopupButton = document.getElementById('close-popup');
 const clearEventsButton = document.getElementById('clear-events');
+const searchBar = document.getElementById('search-bar');
 
 let currentDate = new Date();
-let selectedDate = null;
 let events = JSON.parse(localStorage.getItem('calendarEvents')) || {};
 
 function saveEvents() {
@@ -27,7 +28,7 @@ function renderCalendar(date) {
 
   monthYear.textContent = date.toLocaleString('default', {
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
   });
 
   let row = document.createElement('tr');
@@ -42,13 +43,10 @@ function renderCalendar(date) {
 
     if (events[key]) {
       cell.classList.add('event-day');
-      cell.title = events[key];
     }
 
     cell.addEventListener('click', () => {
-      selectedDate = key;
-      eventTitleInput.value = events[key] || '';
-      eventPopup.style.display = 'flex';
+      showEventPopup(key, year, month, day);
     });
 
     row.appendChild(cell);
@@ -58,34 +56,45 @@ function renderCalendar(date) {
     }
   }
 
-  while (row.children.length < 7) {
-    row.appendChild(document.createElement('td'));
-  }
   calendar.appendChild(row);
 }
 
-function closePopup() {
-  eventPopup.style.display = 'none';
-  selectedDate = null;
-}
+function showEventPopup(key, year, month, day) {
+  eventDate.textContent = `${month + 1}/${day}/${year}`;
+  eventList.innerHTML = '';
 
-function saveEvent() {
-  const title = eventTitleInput.value.trim();
-  if (title) {
-    events[selectedDate] = title;
-  } else {
-    delete events[selectedDate];
+  if (events[key]) {
+    events[key].forEach((event, index) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = event;
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.addEventListener('click', () => {
+        events[key].splice(index, 1);
+        if (events[key].length === 0) {
+          delete events[key];
+        }
+        saveEvents();
+        renderCalendar(currentDate);
+        showEventPopup(key, year, month, day);
+      });
+      listItem.appendChild(deleteBtn);
+      eventList.appendChild(listItem);
+    });
   }
-  saveEvents();
-  renderCalendar(currentDate);
-  closePopup();
-}
 
-function deleteEvent() {
-  delete events[selectedDate];
-  saveEvents();
-  renderCalendar(currentDate);
-  closePopup();
+  eventPopup.style.display = 'block';
+
+  addEventButton.onclick = () => {
+    const event = eventTitleInput.value.trim();
+    if (!event) return;
+    if (!events[key]) events[key] = [];
+    events[key].push(event);
+    saveEvents();
+    renderCalendar(currentDate);
+    showEventPopup(key, year, month, day);
+    eventTitleInput.value = '';
+  };
 }
 
 function clearAllEvents() {
@@ -106,9 +115,22 @@ nextMonthButton.addEventListener('click', () => {
   renderCalendar(currentDate);
 });
 
-closePopupButton.addEventListener('click', closePopup);
-saveEventButton.addEventListener('click', saveEvent);
-deleteEventButton.addEventListener('click', deleteEvent);
+closePopupButton.addEventListener('click', () => {
+  eventPopup.style.display = 'none';
+});
+
 clearEventsButton.addEventListener('click', clearAllEvents);
+
+searchBar.addEventListener('input', () => {
+  const query = searchBar.value.toLowerCase();
+  [...calendar.querySelectorAll('td')].forEach((cell) => {
+    const key = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${cell.textContent}`;
+    if (events[key] && events[key].some((event) => event.toLowerCase().includes(query))) {
+      cell.style.backgroundColor = '#ffecb3';
+    } else {
+      cell.style.backgroundColor = '';
+    }
+  });
+});
 
 renderCalendar(currentDate);
