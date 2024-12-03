@@ -2,37 +2,56 @@
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  background-color: #f5f5f5;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+:root {
+  --bg-color: #f5f5f5;
+  --text-color: #333;
+  --header-bg: #1976d2;
+  --header-text: white;
+  --highlight-color: #ffecb3;
+  --event-color: #1976d2;
+}
+
+body.dark-mode {
+  --bg-color: #121212;
+  --text-color: #f5f5f5;
+  --header-bg: #333;
+  --header-text: #f5f5f5;
+  --highlight-color: #ffcc80;
+  --event-color: #90caf9;
 }
 
 #calendar-container {
   width: 100%;
   max-width: 600px;
-  background: #fff;
-  border: 1px solid #ddd;
+  background: var(--bg-color);
   border-radius: 10px;
+  overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding-bottom: 15px;
-  overflow: hidden;
 }
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1976d2;
-  color: white;
+  background: var(--header-bg);
+  color: var(--header-text);
   padding: 10px 20px;
 }
 
 header button {
   background: none;
   border: none;
-  color: white;
+  color: var(--header-text);
   font-size: 1.5rem;
   cursor: pointer;
   transition: transform 0.2s;
@@ -69,31 +88,31 @@ header button:hover {
 }
 
 #calendar th {
-  background-color: #f1f1f1;
-  color: #333;
+  background-color: var(--highlight-color);
+  color: var(--text-color);
 }
 
 #calendar td {
   height: 60px;
-  cursor: pointer;
   position: relative;
+  cursor: pointer;
 }
 
 #calendar td:hover {
-  background-color: #e0f2f1;
-}
-
-#calendar td.event-day {
-  background-color: #ffecb3;
+  background-color: var(--highlight-color);
 }
 
 #calendar td.event-day::after {
-  content: "+";
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
+  content: attr(data-events);
   font-size: 0.9rem;
-  color: #1976d2;
+  color: var(--event-color);
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+}
+
+.hidden {
+  display: none;
 }
 
 #event-popup {
@@ -101,52 +120,36 @@ header button:hover {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #fff;
-  padding: 20px;
+  background: var(--bg-color);
+  border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  display: none;
+  padding: 20px;
   z-index: 10;
-  width: 90%;
-  max-width: 400px;
 }
 
-#event-popup input {
-  width: calc(100% - 20px);
-  margin: 10px auto;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-#event-popup ul {
-  list-style: none;
-  padding: 0;
-  max-height: 150px;
-  overflow-y: auto;
-}
-
-#event-popup ul li {
+#settings {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 5px 0;
-  border-bottom: 1px solid #ddd;
-}
-
-#popup-buttons button {
-  margin: 5px;
-}
-
-#clear-events {
   margin: 10px 20px;
-  padding: 8px;
-  font-size: 1rem;
-  color: white;
-  background-color: #d32f2f;
+}
+
+#toggle-dark-mode,
+#clear-events {
+  padding: 8px 10px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#toggle-dark-mode {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+}
+
+#clear-events {
+  background-color: #d32f2f;
+  color: white;
 }
 
 #clear-events:hover {

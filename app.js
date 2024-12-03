@@ -1,4 +1,3 @@
-// script.js
 const calendar = document.querySelector('#calendar tbody');
 const monthYear = document.getElementById('month-year');
 const prevMonthButton = document.getElementById('prev-month');
@@ -8,12 +7,14 @@ const eventDate = document.getElementById('event-date');
 const eventList = document.getElementById('event-list');
 const eventTitleInput = document.getElementById('event-title');
 const addEventButton = document.getElementById('add-event');
-const closePopupButton = document.getElementById('close-popup');
 const clearEventsButton = document.getElementById('clear-events');
+const toggleDarkMode = document.getElementById('toggle-dark-mode');
 const searchBar = document.getElementById('search-bar');
 
 let currentDate = new Date();
 let events = JSON.parse(localStorage.getItem('calendarEvents')) || {};
+let isEditing = false;
+let editIndex = null;
 
 function saveEvents() {
   localStorage.setItem('calendarEvents', JSON.stringify(events));
@@ -26,10 +27,7 @@ function renderCalendar(date) {
   const firstDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
 
-  monthYear.textContent = date.toLocaleString('default', {
-    month: 'long',
-    year: 'numeric',
-  });
+  monthYear.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
 
   let row = document.createElement('tr');
   for (let i = 0; i < firstDay; i++) {
@@ -43,11 +41,10 @@ function renderCalendar(date) {
 
     if (events[key]) {
       cell.classList.add('event-day');
+      cell.setAttribute('data-events', `${events[key].length} events`);
     }
 
-    cell.addEventListener('click', () => {
-      showEventPopup(key, year, month, day);
-    });
+    cell.addEventListener('click', () => showEventPopup(key, year, month, day));
 
     row.appendChild(cell);
     if (row.children.length === 7) {
@@ -67,17 +64,16 @@ function showEventPopup(key, year, month, day) {
     events[key].forEach((event, index) => {
       const listItem = document.createElement('li');
       listItem.textContent = event;
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', () => startEditEvent(key, index, event));
+
       const deleteBtn = document.createElement('button');
       deleteBtn.textContent = 'Delete';
-      deleteBtn.addEventListener('click', () => {
-        events[key].splice(index, 1);
-        if (events[key].length === 0) {
-          delete events[key];
-        }
-        saveEvents();
-        renderCalendar(currentDate);
-        showEventPopup(key, year, month, day);
-      });
+      deleteBtn.addEventListener('click', () => deleteEvent(key, index));
+
+      listItem.appendChild(editBtn);
       listItem.appendChild(deleteBtn);
       eventList.appendChild(listItem);
     });
@@ -86,15 +82,40 @@ function showEventPopup(key, year, month, day) {
   eventPopup.style.display = 'block';
 
   addEventButton.onclick = () => {
-    const event = eventTitleInput.value.trim();
-    if (!event) return;
-    if (!events[key]) events[key] = [];
-    events[key].push(event);
+    if (isEditing) {
+      events[key][editIndex] = eventTitleInput.value.trim();
+      isEditing = false;
+      editIndex = null;
+      addEventButton.textContent = 'Add Event';
+    } else {
+      const newEvent = eventTitleInput.value.trim();
+      if (!newEvent) return;
+      if (!events[key]) events[key] = [];
+      events[key].push(newEvent);
+    }
+
     saveEvents();
     renderCalendar(currentDate);
     showEventPopup(key, year, month, day);
     eventTitleInput.value = '';
   };
+}
+
+function startEditEvent(key, index, event) {
+  eventTitleInput.value = event;
+  addEventButton.textContent = 'Save Changes';
+  isEditing = true;
+  editIndex = index;
+}
+
+function deleteEvent(key, index) {
+  events[key].splice(index, 1);
+  if (events[key].length === 0) {
+    delete events[key];
+  }
+  saveEvents();
+  renderCalendar(currentDate);
+  showEventPopup(key, currentDate.getFullYear(), currentDate.getMonth(), parseInt(eventDate.textContent.split('/')[1]));
 }
 
 function clearAllEvents() {
@@ -104,6 +125,10 @@ function clearAllEvents() {
     renderCalendar(currentDate);
   }
 }
+
+toggleDarkMode.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+});
 
 prevMonthButton.addEventListener('click', () => {
   currentDate.setMonth(currentDate.getMonth() - 1);
@@ -115,10 +140,6 @@ nextMonthButton.addEventListener('click', () => {
   renderCalendar(currentDate);
 });
 
-closePopupButton.addEventListener('click', () => {
-  eventPopup.style.display = 'none';
-});
-
 clearEventsButton.addEventListener('click', clearAllEvents);
 
 searchBar.addEventListener('input', () => {
@@ -126,7 +147,7 @@ searchBar.addEventListener('input', () => {
   [...calendar.querySelectorAll('td')].forEach((cell) => {
     const key = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${cell.textContent}`;
     if (events[key] && events[key].some((event) => event.toLowerCase().includes(query))) {
-      cell.style.backgroundColor = '#ffecb3';
+      cell.style.backgroundColor = 'var(--highlight-color)';
     } else {
       cell.style.backgroundColor = '';
     }
